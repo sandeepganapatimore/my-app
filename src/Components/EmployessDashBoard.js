@@ -6,13 +6,14 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import moment from "moment";
 // import moment from 'moment"
+// import { Form, Input, Spin } from "antd";
 import Icon, {
   EditTwoTone,
   DeleteTwoTone,
   SaveTwoTone,
 } from "@ant-design/icons";
 import Button from "@mui/material/Button";
-import { Label, Sort } from "@mui/icons-material";
+import { Label, Phone, Sort } from "@mui/icons-material";
 import TextField from "@mui/material/TextField";
 import { Form, Input, Spin } from "antd";
 import { useNavigate } from "react-router-dom";
@@ -21,92 +22,124 @@ import { Space, Table, Tag } from "antd";
 import { render } from "@testing-library/react";
 import CustomerDashBoard from "../Customers/CustomerDashBoard";
 import EditPackage from "./EditPackage";
+import EditModal from "./EditModal";
+import DeleteModal from "./DeleteModal";
 // import Moment from "react-moment";
 
 function OrderPlacement() {
-  const [firstName, setFirstName] = React.useState("");
-  const [lastName, setLastName] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [role, setRole] = React.useState("");
-  const [email, setEmail] = React.useState("");
   const [data, setData] = React.useState(null);
-  const [address, SetAddress] = React.useState("");
   const [id, setId] = React.useState(null);
-
+  const [open, setOpen] = React.useState(false);
+  const [packageType, setPackageType] = React.useState(null);
+  const [weight, setWeight] = React.useState(null);
+  const [price, setPrice] = React.useState(null);
+  // open,
+  // setOpen,
+  // packageType,
+  // setPackageType,
+  // weight,
+  // setWeight,
+  // price,
+  // setPrice,
+  // packageId,
+  // setPackageId,
   const [edit, setEdit] = React.useState(false);
+  const [success, setSuccess] = React.useState(false);
+  const [deleteValue, setDeleteValue] = React.useState(false);
+
+  const DeleteValue = () => {};
+
+  const EditData = (id) => {};
   const columns = [
     {
-      title: "Order Id",
-      dataIndex: "Order Id",
-      key: "name",
+      title: "Pricing Id",
+      dataIndex: "PricingId",
+      key: "PricingId",
       // align: "center",
       alignItems: "center",
-      sorter: (a, b) => a.order_id - b.order_id,
+      sorter: (a, b) => a.pricing_id - b.pricing_id,
       // render: (_, raw) => console.log("raw,raw", raw),
       render: (_, raw) => {
         return (
           <>
-            <span>{raw.order_id}</span>
+            <span>{raw.pricing_id}</span>
           </>
         );
       },
     },
     {
-      title: "Customer Id",
-      dataIndex: "CustomerId",
-      key: "CustomerId",
+      title: "Package Type",
+      dataIndex: "PackageType",
+      key: "PackageType",
       alignItems: "center",
-      sorter: (a, b) => a.customer_id.localeCompare(b.customer_id),
+      sorter: (a, b) => a.package_type.localeCompare(b.package_type),
       render: (_, raw) => {
         return (
           <>
-            <span>{raw.customer_id}</span>
+            <span>{raw.package_type}</span>
           </>
         );
       },
     },
+
     {
-      title: "Date",
-      dataIndex: "Date",
+      title: "Price",
+      dataIndex: "Price",
+      key: "Price",
       alignItems: "center",
-      key: "Date",
-      sorter: (a, b) => a.order_date.localeCompare(b.order_date),
+      sorter: (a, b) => a.price - b.price,
       render: (_, raw) => {
         return (
           <>
-            {/* <span>{raw.pickup_address}</span> */}
-            <span>
-              {moment(raw.order_date).format("MMMM Do YYYY, h:mm:ss a")}
-              {/* {Moment(data.order_date).format("MMMM Do YYYY, h:mm:ss a")} */}
-            </span>
+            <span>{raw.price}</span>
           </>
         );
       },
     },
     {
-      title: "Order Status",
-      dataIndex: "OrderStatus",
-      key: "OrderStatus",
-      alignItems: "center",
-      sorter: (a, b) => a.order_status.localeCompare(b.order_status),
-      render: (_, raw) => {
-        return (
-          <>
-            <span>{raw.order_status}</span>
-          </>
-        );
-      },
-    },
-    {
-      title: "Package Id",
-      dataIndex: "PackageId",
-      key: "PackageId",
+      title: "Weight",
+      dataIndex: "Weight",
+      key: "Weight",
       alignItems: "center",
       sorter: (a, b) => a.package_id.localeCompare(b.package_id),
       render: (_, raw) => {
         return (
           <>
-            <span>{raw.package_id}</span>
+            <span>{raw.weight}</span>
+          </>
+        );
+      },
+    },
+    {
+      title: "Change",
+      dataIndex: "Change",
+      key: "Change",
+      alignItems: "center",
+      render: (_, raw) => {
+        console.log("raw0", raw);
+        return (
+          <>
+            <div style={{ display: "flex" }}>
+              <span>
+                <EditTwoTone
+                  onClick={() => {
+                    setEdit(true);
+                    setId(raw.pricing_id);
+                    setPackageType(raw.package_type);
+                    setWeight(raw.weight);
+                    setPrice(raw.price);
+                  }}
+                />
+              </span>
+              <span style={{ paddingLeft: "10px" }}>
+                <DeleteTwoTone
+                  onClick={() => {
+                    setDeleteValue(true);
+                    setId(raw.pricing_id);
+                  }}
+                />
+              </span>
+            </div>
           </>
         );
       },
@@ -125,26 +158,58 @@ function OrderPlacement() {
         setData(value);
         // setEmployeeId(data.employee_id);
         // setName(data.full_name);
-        setEmail(data.email);
-        setRole(data.role);
+        // setEmail(data.email);
+        // setRole(data.role);
       });
   };
   console.log("datat0", data);
+  React.useEffect(() => {
+    fetch(`http://127.0.0.1:8000/pricing/`)
+      .then((res) => {
+        console.log("Response", res);
+        return res.json();
+      })
+      .then((data) => {
+        console.log(data);
+        setData(data);
+      });
+  }, [success]);
+
+  console.log("data", id);
   return (
     <>
-      <div>
-        <span>Enter History Order Id</span>
-        <input
-          type="text"
-          value={id}
-          onChange={(e) => setId(e.target.value)}
-          style={{ marginLeft: "10px", borderRadius: "2px" }}
-        />
-        <button style={{ marginLeft: "10px" }} onClick={User}>
-          Submit
-        </button>
-      </div>
       <div>{data && <Table dataSource={data} columns={columns} />}</div>
+      <div>
+        {edit && (
+          <>
+            <EditModal
+              open={edit}
+              setOpen={setEdit}
+              packageType={packageType}
+              setPackageType={setPackageType}
+              weight={weight}
+              setWeight={setWeight}
+              price={price}
+              setPrice={setPrice}
+              packageId={id}
+              setPackageId={setId}
+              success={success}
+              setSuccess={setSuccess}
+            />
+          </>
+        )}
+        {/* {deleteValue && (
+          <>
+            <DeleteModal
+              open={deleteValue}
+              setOpen={setDeleteValue}
+              id={id}
+              success={success}
+              setSuccess={setSuccess}
+            />
+          </>
+        )} */}
+      </div>
     </>
     // </div>
     // </div>
@@ -156,10 +221,10 @@ function Packages() {
   const [id, setId] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
   const [editModal, setEditModal] = React.useState(false);
-  const [recieverName,setRecieverName]=React.useState("");
-  const [senderName,setSenderName]=React.useState("");
-  const [status,setStatus]=React.useState("");
-  const [bool,setBool]=React.useState(false)
+  const [recieverName, setRecieverName] = React.useState("");
+  const [senderName, setSenderName] = React.useState("");
+  const [status, setStatus] = React.useState("");
+  const [bool, setBool] = React.useState(false);
   const columns = [
     {
       title: "Package Id",
@@ -187,7 +252,7 @@ function Packages() {
         );
       },
     },
-  
+
     {
       title: "Reciever Name",
       dataIndex: "RecieverName",
@@ -259,22 +324,29 @@ function Packages() {
       key: "Change",
       alignItems: "center",
       render: (_, raw) => {
-          return (
-              <>
-                  <div>
-                      <EditTwoTone onClick={() => setEditModal(true)} style={{ paddingLeft: "10px", paddingRight: "10px", cursor: "pointer" }} />
-                      {/* <DeleteTwoTone onClick={()=>setDeleteModal(true)}  style={{paddingLeft:"10px",paddingRight:"10px",cursor:"pointer"}} />
+        return (
+          <>
+            <div>
+              <EditTwoTone
+                onClick={() => setEditModal(true)}
+                style={{
+                  paddingLeft: "10px",
+                  paddingRight: "10px",
+                  cursor: "pointer",
+                }}
+              />
+              {/* <DeleteTwoTone onClick={()=>setDeleteModal(true)}  style={{paddingLeft:"10px",paddingRight:"10px",cursor:"pointer"}} />
         <SaveTwoTone  style={{paddingLeft:"10px",paddingRight:"10px",cursor:"pointer"}}/> */}
-                  </div>
-              </>
-          );
+            </div>
+          </>
+        );
       },
-  },
+    },
   ];
-  
+
   const User = () => {
     setLoading(true);
-let value=[]
+    let value = [];
     fetch(`http://127.0.0.1:8000/packages/${id}`)
       .then((res) => {
         console.log("Response value", res);
@@ -282,49 +354,49 @@ let value=[]
       })
       .then((data) => {
         console.log(data);
-        value.push(data)
+        value.push(data);
         setData(value);
         setLoading(false);
         // setEmployeeId(data.employee_id);
         // setName(data.full_name);
       });
   };
-React.useEffect(()=>{
-  if(bool===true){
-    User();
-    setBool(false)
-  }
-},[bool])
+  React.useEffect(() => {
+    if (bool === true) {
+      User();
+      setBool(false);
+    }
+  }, [bool]);
 
-const UpdateData=()=>{
-  let value=[]
-  fetch(`http://127.0.0.1:8000/packages/${id}`, {
-    method: "PUT",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      receiver_name: recieverName,
-      receiver_address: senderName,
-      status: status
-    //   password:password
-    }),
-  })
-  .then((res) => {
-    console.log("Response value", res);
-    return res.json();
-  })
-  .then((data) => {
-    console.log(data);
-    value.push(data)
-    setData(value);
-    setLoading(false);
-    setBool(true)
-    // setEmployeeId(data.employee_id);
-    // setName(data.full_name);
-  });
-}
+  const UpdateData = () => {
+    let value = [];
+    fetch(`http://127.0.0.1:8000/packages/${id}`, {
+      method: "PUT",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        receiver_name: recieverName,
+        receiver_address: senderName,
+        status: status,
+        //   password:password
+      }),
+    })
+      .then((res) => {
+        console.log("Response value", res);
+        return res.json();
+      })
+      .then((data) => {
+        console.log(data);
+        value.push(data);
+        setData(value);
+        setLoading(false);
+        setBool(true);
+        // setEmployeeId(data.employee_id);
+        // setName(data.full_name);
+      });
+  };
 
   console.log("history data", data);
   return (
@@ -362,9 +434,19 @@ const UpdateData=()=>{
         )}
       </div>
       <div>
-        { 
-          editModal && <EditPackage open={editModal} setOpen={setEditModal} receivrName={recieverName} senderName={senderName} status={status} setRecieverName={setRecieverName} setSenderName={setSenderName} setStatus={setStatus}  success={UpdateData}/>
-        }
+        {editModal && (
+          <EditPackage
+            open={editModal}
+            setOpen={setEditModal}
+            receivrName={recieverName}
+            senderName={senderName}
+            status={status}
+            setRecieverName={setRecieverName}
+            setSenderName={setSenderName}
+            setStatus={setStatus}
+            success={UpdateData}
+          />
+        )}
       </div>
     </>
   );
@@ -413,26 +495,19 @@ function PlacePackage() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        // order_id: parseInt(customerId),
-        // customer_id: parseInt(customerId),
-        // pickup_address: pAddress,
-        // delivery_address: dAddress,
-        // package_info: information,
-        // created_at: "string",
-        // "package_id": 0,
         sender_name: senderName,
-        sender_address:senderAddress,
+        sender_address: senderAddress,
         receiver_name: receiverName,
         receiver_address: recieverAddress,
         weight: parseInt(weight),
-        status: status
+        status: status,
       }),
     })
       .then((res) => {
         console.log("Response", res.status);
         if (res.status === 200) {
           toast.success("Order Placed!");
-          
+
           // window.location.reload();
         }
         return res.json();
@@ -541,10 +616,7 @@ function PlacePackage() {
               },
             ]}
           >
-            <Input
-              value={weight}
-              onChange={(e) => setWeight(e.target.value)}
-            />
+            <Input value={weight} onChange={(e) => setWeight(e.target.value)} />
           </Form.Item>
           <Form.Item
             label="Status"
@@ -559,10 +631,7 @@ function PlacePackage() {
               },
             ]}
           >
-            <Input
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            />
+            <Input value={status} onChange={(e) => setStatus(e.target.value)} />
           </Form.Item>
           <Form.Item {...tailLayout}>
             <Button type="primary" htmlType="submit" onClick={User}>
@@ -574,6 +643,87 @@ function PlacePackage() {
     </>
   );
 }
+
+const AddCart = () => {
+  const [name, setName] = React.useState("");
+  const [number, setNumber] = React.useState("");
+  const [statusValue, setStatus] = React.useState("");
+  const [form] = Form.useForm();
+  const [id, setId] = React.useState("");
+  const User = () => {
+    form.resetFields();
+    fetch(`http://127.0.0.1:8000/deliveries`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        package_id: parseInt(id),
+        delivery_person_name: name,
+        delivery_person_phone: number,
+        delivery_status: statusValue,
+        // created_at: "string",
+      }),
+    })
+      .then((res) => {
+        console.log("Response", res.status);
+        if (res.status === 200) {
+          toast.success("Order Placed!");
+
+          form.resetFields();
+          window.location.reload();
+        }
+        return res.json();
+      })
+      .then((data) => {
+        console.log(data);
+      });
+  };
+
+  return (
+    <>
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <label>Id: </label>
+        <input
+          value={id}
+          onChange={(e) => setId(e.target.value)}
+          style={{ paddingLeft: "10px" }}
+        />
+      </div>
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <label>Name: </label>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          style={{ paddingLeft: "10px" }}
+        />
+      </div>
+      {/* <br /> */}
+      <div
+        style={{ display: "flex", justifyContent: "center", marginTop: "5px" }}
+      >
+        <label>Number: </label>
+        <input
+          value={number}
+          onChange={(e) => setNumber(e.target.value)}
+          style={{ paddingLeft: "10px" }}
+        />
+      </div>
+      <div
+        style={{ display: "flex", justifyContent: "center", marginTop: "5px" }}
+      >
+        <label>Status: </label>
+        <input
+          value={statusValue}
+          onChange={(e) => setStatus(e.target.value)}
+          style={{ paddingLeft: "10px" }}
+        />
+      </div>
+      <Button onClick={User}>Submit</Button>
+    </>
+  );
+};
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -617,7 +767,7 @@ export default function EmployeeDashBoard() {
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Typography >Couriers</Typography>
+      <Typography>Couriers</Typography>
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs
           value={value}
@@ -627,7 +777,7 @@ export default function EmployeeDashBoard() {
           <Tab label="Packages" {...a11yProps(0)} />
           <Tab label="Create Package" {...a11yProps(1)} />
           <Tab label="Pricing" {...a11yProps(1)} />
-          <Tab label="Deliveries" {...a11yProps(2)} />
+          <Tab label="Add to Cart" {...a11yProps(2)} />
           {/* <Tab label="Item Three" {...a11yProps(2)} /> */}
         </Tabs>
       </Box>
@@ -643,7 +793,7 @@ export default function EmployeeDashBoard() {
       </CustomTabPanel>
       <CustomTabPanel value={value} index={3}>
         {" "}
-        <CustomerDashBoard/>
+        <AddCart />
       </CustomTabPanel>
     </Box>
   );
