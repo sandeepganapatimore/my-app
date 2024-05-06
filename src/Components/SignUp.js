@@ -70,8 +70,9 @@ export default function SignUp() {
         // full_name: firstName.concat(" ", lastName),
         // email: email,
         // role: role,
-        email:email,
+        
         full_name:firstName.concat(" ", lastName),
+        email:email,
         password:password,
         role:role
       }),
@@ -148,7 +149,22 @@ export default function SignUp() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
-                <br></br>
+                
+                 <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  name="password"
+                  label="Password"
+                  type="password"
+                  id="password"
+                  autoComplete="new-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  style ={{marginTop : "10px"}}
+                />
+              </Grid>
+                
                 <TextField
                   required
                   fullWidth
@@ -161,19 +177,7 @@ export default function SignUp() {
                   onChange={(e) => setRole(e.target.value)}
                 />
               </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  autoComplete="new-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </Grid>
+             
               <Grid item xs={12}>
                 <FormControlLabel
                   control={
